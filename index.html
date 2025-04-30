@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Productos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Productos</h1>
+        <form id="productForm">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id" required>
+
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="deliveryDate">Fecha de Entrega:</label>
+            <input type="date" id="deliveryDate" name="deliveryDate" required>
+
+            <button type="submit">Registrar Producto</button>
+        </form>
+
+        <h2>Lista de Productos</h2>
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Fecha de Entrega</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
