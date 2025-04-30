@@ -3,38 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Productos</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Registro de Pedidos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Registro de Productos</h1>
-        <form id="productForm">
-            <label for="id">ID:</label>
-            <input type="text" id="id" name="id" required>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-indigo-700 mb-2">Sistema de Registro de Pedidos</h1>
+            <p class="text-gray-600">Administra tus productos y fechas de entrega</p>
+        </header>
 
-            <label for="name">Nombre:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="deliveryDate">Fecha de Entrega:</label>
-            <input type="date" id="deliveryDate" name="deliveryDate" required>
-
-            <button type="submit">Registrar Producto</button>
-        </form>
-
-        <h2>Lista de Productos</h2>
-        <table id="productTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Fecha de Entrega</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Formulario de registro -->
+            <div class="bg-white rounded-lg shadow-md p-6 md:col-span-1">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-plus-circle text-indigo-500 mr-2"></i> Nuevo Producto
+                </h2>
+                
+                <form id="productForm" class="space-y-4">
+                    <div>
+                        <label for="productType" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Producto</label>
+                        <select id="productType" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="" disabled selected>Seleccione un tipo</option>
+                            <option value="Electrónico">Electrónico</option>
+                            <option value="Ropa">Ropa</option>
+                            <option value="Alimento">Alimento</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">ID del Producto</label>
+                        <input type="text" id="productId" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: PROD-001">
+                    </div>
+                    
+                    <div>
+                        <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                        <input type="text" id="productName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Smartphone X">
+                    </div>
+                    
+                    <div>
+                        <label for="deliveryDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Entrega</label>
+                        <input type="date" id="deliveryDate" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors flex items-center justify-center">
+                            <i class="fas fa-save mr-2"></i> Registrar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Lista de productos -->
+            <div class="bg-white rounded-lg shadow-md p-6 md:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-clipboard-list text-indigo-500 mr-2"></i> Productos Registrados
+                    </h2>
+                    <div class="flex space-x-2">
+                        <button id="clearAllBtn" class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-sm hover:bg-red-200 transition-colors flex items-center">
+                            <i class="fas fa-trash-alt mr-1"></i> Limpiar
+                        </button>
+                        <button id="exportBtn" class="bg-green-100 text-green-600 px-3 py-1 rounded-md text-sm hover:bg-green-200 transition-colors flex items-center">
+                            <i class="fas fa-file-export mr-1"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrega</th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Los productos se agregarán aquí dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="emptyState" class="text-center py-8">
+                    <i class="fas fa-box-open text-gray-300 text-5xl mb-3"></i>
+                    <p class="text-gray-500">No hay productos registrados</p>
+                    <p class="text-gray-400 text-sm mt-1">Agrega tu primer producto usando el formulario</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-pie text-indigo-500 mr-2"></i> Estadísticas
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-indigo-50 p-4 rounded-lg">
+                    <p class="text-sm text-indigo-600 font-medium">Total Productos</p>
+                    <p id="totalProducts" class="text-2xl font-bold text-indigo-700">0</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <p class="text-sm text-green-600 font-medium">Próximas entregas</p>
+                    <p id="upcomingDeliveries" class="text-2xl font-bold text-green-700">0</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <p class="text-sm text-purple-600 font-medium">Tipos diferentes</p>
+                    <p id="differentTypes" class="text-2xl font-bold text-purple-700">0</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- Modal de confirmación -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 fade-in">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
+                    <i class="fas fa-exclamation text-red-600"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Confirmar acción</h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500" id="modalMessage">¿Estás seguro de que deseas eliminar todos los productos?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end space-x-3">
+                <button id="cancelModalBtn" type="button" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancelar
+                </button>
+                <button id="confirmModalBtn" type="button" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación -->
+    <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg hidden items-center fade-in">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="notificationMessage">Producto registrado con éxito</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const productForm = document.getElementById('productForm');
+            const productTableBody = document.getElementById('productTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const confirmModal = document.getElementById('confirmModal');
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+            const confirmModalBtn = document.getElementById('confirmModalBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            // Elementos de estadísticas
+            const totalProducts = document.getElementById('totalProducts');
+            const upcomingDeliveries = document.getElementById('upcomingDeliveries');
+            const differentTypes = document.getElementById('differentTypes');
+            
+            // Cargar productos del localStorage
+            let products = JSON.parse(localStorage.getItem('products')) || [];
+            
+            // Mostrar productos al cargar la página
+            renderProducts();
+            updateStats();
+            
+            // Evento para enviar el formulario
+            productForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const productType = document.getElementById('productType').value;
+                const productId = document.getElementById('productId').value.trim();
+                const productName = document.getElementById('productName').value.trim();
+                const deliveryDate = document.getElementById('deliveryDate').value;
+                
+                // Validaciones
+                if (!productType) {
+                    showError('productType', 'Selecciona un tipo de producto');
+                    return;
+                }
+                
+                if (!productId) {
+                    showError('productId', 'El ID del producto es requerido');
+                    return;
+                }
+                
+                if (!productName) {
+                    showError('productName', 'El nombre del producto es requerido');
+                    return;
+                }
+                
+                if (!deliveryDate) {
+                    showError('deliveryDate', 'La fecha de entrega es requerida');
+                    return;
+                }
+                
+                // Verificar si el ID ya existe
+                if (products.some(product => product.id === productId)) {
+                    showError('productId', 'Este ID ya está registrado');
+                    return;
+                }
+                
+                // Crear nuevo producto
+                const newProduct = {
+                    type: productType,
+                    id: productId,
+                    name: productName,
+                    delivery: deliveryDate,
+                    createdAt: new Date().toISOString()
+                };
+                
+                // Agregar al array y guardar
+                products.push(newProduct);
+                localStorage.setItem('products', JSON.stringify(products));
+                
+                // Limpiar formulario
+                productForm.reset();
+                
+                // Actualizar la vista
+                renderProducts();
+                updateStats();
+                
+                // Mostrar notificación
+                showNotification('Producto registrado con éxito', 'green');
+            });
+            
+            // Evento para limpiar todos los productos
+            clearAllBtn.addEventListener('click', function() {
+                if (products.length === 0) return;
+                
+                showModal(
+                    'Confirmar eliminación', 
+                    '¿Estás seguro de que deseas eliminar todos los productos registrados? Esta acción no se puede deshacer.',
+                    function() {
+                        products = [];
+                        localStorage.setItem('products', JSON.stringify(products));
+                        renderProducts();
+                        updateStats();
+                        showNotification('Todos los productos han sido eliminados', 'red');
+                        hideModal();
+                    }
+                );
+            });
+            
+            // Evento para exportar datos
+            exportBtn.addEventListener('click', function() {
+                if (products.length === 0) {
+                    showNotification('No hay productos para exportar', 'yellow');
+                    return;
+                }
+                
+                const dataStr = JSON.stringify(products, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `productos_${new Date().toISOString().slice(0,10)}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                showNotification('Datos exportados con éxito', 'blue');
+            });
+            
+            // Eventos del modal
+            cancelModalBtn.addEventListener('click', hideModal);
+            
+            // Funciones auxiliares
+            function renderProducts() {
+                if (products.length === 0) {
+                    productTableBody.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                
+                // Ordenar por fecha de creación (más recientes primero)
+                const sortedProducts = [...products].sort((a, b) => 
+                    new Date(b.createdAt) - new Date(a.createdAt)
+                );
+                
+                productTableBody.innerHTML = sortedProducts.map(product => `
+                    <tr class="fade-in">
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                ${getTypeColorClass(product.type)}">
+                                ${product.type}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${product.id}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${product.name}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                            ${formatDate(product.delivery)}
+                            ${isUpcomingDelivery(product.delivery) ? 
+                                '<span class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full">Próximo</span>' : ''}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                            <button onclick="deleteProduct('${product.id}')" class="text-red-500 hover:text-red-700 mr-2">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            function getTypeColorClass(type) {
+                switch(type) {
+                    case 'Electrónico': return 'bg-blue-100 text-blue-800';
+                    case 'Ropa': return 'bg-purple-100 text-purple-800';
+                    case 'Alimento': return 'bg-green-100 text-green-800';
+                    default: return 'bg-gray-100 text-gray-800';
+                }
+            }
+            
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('es-ES', options);
+            }
+            
+            function isUpcomingDelivery(dateString) {
+                const deliveryDate = new Date(dateString);
+                const today = new Date();
+                const oneWeekFromNow = new Date();
+                oneWeekFromNow.setDate(today.getDate() + 7);
+                
+                return deliveryDate > today && deliveryDate <= oneWeekFromNow;
+            }
+            
+            function updateStats() {
+                totalProducts.textContent = products.length;
+                
+                // Contar entregas próximas
+                const upcomingCount = products.filter(p => 
+                    isUpcomingDelivery(p.delivery)
+                ).length;
+                upcomingDeliveries.textContent = upcomingCount;
+                
+                // Contar tipos diferentes
+                const types = new Set(products.map(p => p.type));
+                differentTypes.textContent = types.size;
+            }
+            
+            function showError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                field.classList.add('shake', 'border-red-500');
+                
+                // Eliminar cualquier mensaje de error existente
+                const existingError = field.nextElementSibling;
+                if (existingError && existingError.classList.contains('error-message')) {
+                    existingError.remove();
+                }
+                
+                // Crear y mostrar mensaje de error
+                const errorElement = document.createElement('p');
+                errorElement.textContent = message;
+                errorElement.className = 'mt-1 text-sm text-red-600 error-message';
+                field.parentNode.insertBefore(errorElement, field.nextSibling);
+                
+                // Eliminar clases después de la animación
+                setTimeout(() => {
+                    field.classList.remove('shake');
+                }, 500);
+                
+                // Enfocar el campo con error
+                field.focus();
+            }
+            
+            function showModal(title, message, confirmCallback) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                confirmModal.classList.remove('hidden');
+                
+                // Configurar la acción de confirmación
+                confirmModalBtn.onclick = function() {
+                    confirmCallback();
+                };
+            }
+            
+            function hideModal() {
+                confirmModal.classList.add('hidden');
+            }
+            
+            function showNotification(message, color = 'green') {
+                notificationMessage.textContent = message;
+                notification.className = `fixed bottom-4 right-4 text-white px-4 py-2 rounded-md shadow-lg flex items-center fade-in bg-${color}-500`;
+                notification.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+            
+            // Hacer la función deleteProduct accesible globalmente para los botones
+            window.deleteProduct = function(productId) {
+                showModal(
+                    'Eliminar producto', 
+                    '¿Estás seguro de que deseas eliminar este producto?',
+                    function() {
+                        products = products.filter(p => p.id !== productId);
+                        localStorage.setItem('products', JSON.stringify(products));
+                        renderProducts();
+                        updateStats();
+                        showNotification('Producto eliminado', 'red');
+                        hideModal();
+                    }
+                );
+            };
+        });
+    </script>
 </body>
 </html>
